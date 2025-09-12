@@ -28,9 +28,13 @@ from PIL import Image
 from enum import StrEnum
 
 BATCH_SIZE = 32
-DEVICE = "cuda"
+DEVICE = "cuda"  # Will be updated dynamically below
 MASK_THRESHOLD = 0.5
 IMAGE_SIZE = 500
+
+# Import after other imports
+from .segmentation_utils.device_utils import get_best_device
+DEVICE = get_best_device()
 
 
 class InferencePrecision(StrEnum):
@@ -126,7 +130,7 @@ def create_all_masks(whole_embryo_segmentation_model: torch.nn.Module):
     Returns:
         Tuple[List[PIL.Image.Image], List[PIL.Image.Image]]: Full image and mask lists.
     """
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DEVICE = get_best_device()
     BATCH_SIZE = 32
     MASK_THRESHOLD = 0.9
     IMAGE_SIZE = 224
@@ -345,7 +349,7 @@ def create_all_masks_separate_circles():
     (when pronuclei are not showing).
 
     """
-    DEVICE = "cuda"
+    DEVICE = get_best_device()
     BATCH_SIZE = 32
     MASK_THRESHOLD = 0.9
     IMAGE_SIZE = 224
@@ -445,7 +449,7 @@ def create_all_masks_full_(
     3) thresholds each output to two binary masks;
     4) returns (images, circles, whole_masks, pronuc_masks).
     """
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DEVICE = get_best_device()
 
     # 1) get raw frames + circle metadata
     images, circles, pn_whole_masks, paths = create_all_masks_separate_circles()
