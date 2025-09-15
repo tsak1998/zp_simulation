@@ -21,7 +21,8 @@ from albumentations.pytorch import ToTensorV2
 
 def load_checkpoint(checkpoint_path: str, device: str = "cuda"):
     """Load model from checkpoint."""
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    # Handle PyTorch 2.6+ security requirements
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     config = checkpoint["config"]
 
     # Create model

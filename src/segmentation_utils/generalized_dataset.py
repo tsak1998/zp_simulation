@@ -171,19 +171,16 @@ class GeneralizedSegmentationDataset(Dataset):
             
         elif self.config.problem_type == "multiclass":
             # Multi-class segmentation (exclusive classes)
-            mask = np.zeros(
-                (self.config.image_size, self.config.image_size),
-                dtype=np.uint8
-            )
+            # First, load any mask to get original dimensions
+            first_class = list(self.mask_paths.keys())[0]
+            first_mask = np.array(Image.open(self.mask_paths[first_class][idx]).convert("L"))
+            h, w = first_mask.shape
+            
+            mask = np.zeros((h, w), dtype=np.uint8)
             
             # Load each class mask and assign class indices
             for class_idx, (class_name, paths) in enumerate(self.mask_paths.items(), 1):
                 class_mask = np.array(Image.open(paths[idx]).convert("L"))
-                class_mask = cv2.resize(
-                    class_mask,
-                    (self.config.image_size, self.config.image_size),
-                    interpolation=cv2.INTER_NEAREST
-                )
                 # Assign class index where mask is positive
                 mask[class_mask > 128] = class_idx
                 
@@ -195,11 +192,6 @@ class GeneralizedSegmentationDataset(Dataset):
             
             for class_name, paths in self.mask_paths.items():
                 class_mask = np.array(Image.open(paths[idx]).convert("L"))
-                class_mask = cv2.resize(
-                    class_mask,
-                    (self.config.image_size, self.config.image_size),
-                    interpolation=cv2.INTER_NEAREST
-                )
                 # Binary threshold
                 class_mask = (class_mask > 128).astype(np.float32)
                 masks.append(class_mask)
